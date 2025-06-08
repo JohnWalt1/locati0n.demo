@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Instagram Reels Style Location Demo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #262626;
+      --gray-color: #8e8e8e;
+      --primary-color: #262626;
+      --border-radius: 1rem;
+      --shadow: 0 8px 24px rgb(0 0 0 / 0.1);
+      --transition: 0.3s ease;
+    }
+    /* Reset and base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+    }
+    /* Sticky header like Instagram black top bar with text "Instagram" on left */
+    header {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      background: #fff;
+      border-bottom: 1px solid #dbdbdb;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      z-index: 10;
+    }
+    .logo {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      user-select: none;
+      letter-spacing: 0.05em;
+    }
+
+    /* Main reel container */
+    main.reel-container {
+      max-width: 480px;
+      width: 100%;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 3rem;
+      gap: 1.5rem;
+    }
+
+    /* Video placeholder area like reels */
+    .video-placeholder {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16; /* vertical phone portrait */
+      background:
+        linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1.75rem;
+      letter-spacing: 0.05em;
+      user-select: none;
+      text-align: center;
+      padding: 1rem;
+      line-height: 1.2;
+      box-sizing: border-box;
+    }
+    /* Location info card */
+    .location-card {
+      background: #fafafa;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      padding: 1.5rem 1.5rem 2rem;
+      text-align: center;
+    }
+
+    .location-card h2 {
+      margin: 0 0 0.75rem;
+      font-weight: 600;
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      user-select: text;
+    }
+    .location-card p {
+      margin: 0 0 0.25rem;
+      font-size: 1rem;
+      color: var(--text-color);
+      user-select: text;
+    }
+    .location-card pre {
+      margin-top: 1rem;
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 1rem;
+      overflow-x: auto;
+      color: var(--gray-color);
+      user-select: text;
+    }
+    /* Status message */
+    #status {
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--text-color);
+      margin-bottom: 0.5rem;
+      user-select: text;
+    }
+    /* Footer text similar to Instagram's info style */
+    footer {
+      margin-top: auto;
+      padding: 1rem 0;
+      font-size: 0.875rem;
+      color: var(--gray-color);
+      text-align: center;
+      user-select: none;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 480px) {
+      header {
+        height: 48px;
+        padding: 0 0.75rem;
+      }
+      .logo {
+        font-size: 1.25rem;
+      }
+      main.reel-container {
+        margin-top: 16px;
+        padding-bottom: 2rem;
+      }
+      .location-card {
+        padding: 1rem 1rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo" aria-label="Instagram logo">Instagram</div>
+  </header>
+  <main class="reel-container" role="main">
+    <div class="video-placeholder" aria-label="Video placeholder">
+      Demo Reel: Location Tracker
+    </div>
+
+    <section class="location-card" aria-label="Location details">
+      <h2>Location Access Status</h2>
+      <div id="status" role="status" aria-live="polite">Requesting location permission…</div>
+      <pre id="location" aria-live="polite"></pre>
+    </section>
+  </main>
+  <footer>
+    &copy; 2023 Instagram-style Demo &bull; Stay safe online
+  </footer>
+  <script>
+    const statusEl = document.getElementById('status');
+    const locationEl = document.getElementById('location');
+
+    function updateStatus(message, isError = false) {
+      statusEl.textContent = message;
+      if (isError) {
+        statusEl.style.color = "#dc2626"; // red
+      } else {
+        statusEl.style.color = "#262626"; // primary color
+      }
+    }
+
+    function updateLocation(data) {
+      if (data) {
+        locationEl.textContent = JSON.stringify(data, null, 2);
+      } else {
+        locationEl.textContent = '';
+      }
+    }
+
+    function handleSuccess(position) {
+      const { latitude, longitude, accuracy } = position.coords;
+      updateStatus('Location obtained successfully.');
+      updateLocation({
+        latitude: latitude.toFixed(6),
+        longitude: longitude.toFixed(6),
+        accuracy: accuracy + ' meters',
+        timestamp: new Date(position.timestamp).toLocaleString(),
+      });
+      console.log('Location data:', position);
+    }
+
+    function handleError(error) {
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          updateStatus('Permission denied. Location access was not granted.', true);
+          break;
+        case error.POSITION_UNAVAILABLE:
+          updateStatus('Location information is unavailable.', true);
+          break;
+        case error.TIMEOUT:
+          updateStatus('Location request timed out.', true);
+          break;
+        default:
+          updateStatus('An unknown error occurred while fetching location.', true);
+          break;
+      }
+      updateLocation(null);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!navigator.geolocation) {
+        updateStatus('Geolocation is not supported by your browser.', true);
+        updateLocation(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(handleSuccess, handleError, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      });
+    });
+  </script>
+</body>
+</html>
+
